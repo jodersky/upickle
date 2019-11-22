@@ -350,10 +350,10 @@ abstract class Parser[J] {
       // invalid
       case _ => die(i, "expected json value")
     }
-  } catch reject(i, Nil) orElse[Throwable, Nothing] {
+  } catch (reject(i, Nil).orElse[Throwable, Nothing] {
     case e: IndexOutOfBoundsException =>
       throw IncompleteParseException("exhausted input", e)
-  }
+  })
 
   def reject(j: Int, path: List[Any]): PartialFunction[Throwable, Nothing] = {
     case e: Abort =>

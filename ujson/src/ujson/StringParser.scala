@@ -17,7 +17,7 @@ import upickle.core.{Visitor, ObjArrVisitor}
 private[ujson] final class StringParser[J](s: String) extends SyncParser[J] with CharBasedParser[J] {
   var line = 0
   final def column(i: Int) = i
-  final def newline(i: Int) { line += 1 }
+  final def newline(i: Int) = { line += 1 }
   final def reset(i: Int): Int = i
   final def checkpoint(state: Int, i: Int, stack: List[ObjArrVisitor[_, J]], path: List[Any]): Unit = ()
   final def at(i: Int): Char = Platform.charAt(s, i)

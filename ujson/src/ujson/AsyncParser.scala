@@ -73,7 +73,7 @@ final class AsyncParser[J] protected[ujson](
 
   protected[this] var line = 0
   protected[this] var pos = 0
-  protected[this] final def newline(i: Int) { line += 1; pos = i + 1 }
+  protected[this] final def newline(i: Int) = { line += 1; pos = i + 1 }
   protected[this] final def column(i: Int) = i - pos
 
   final def copy() =

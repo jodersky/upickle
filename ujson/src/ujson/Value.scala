@@ -164,18 +164,18 @@ object Value extends AstTransformer[Value]{
   @deprecated("use ujson.Null")
   val Null = ujson.Null
   implicit def JsonableSeq[T](items: TraversableOnce[T])
-                             (implicit f: T => Value) = Arr.from(items.map(f))
+                             (implicit f: T => Value): Arr = Arr.from(items.map(f))
   implicit def JsonableDict[T](items: TraversableOnce[(String, T)])
-                              (implicit f: T => Value)= Obj.from(items.map(x => (x._1, f(x._2))))
-  implicit def JsonableBoolean(i: Boolean) = if (i) ujson.True else ujson.False
-  implicit def JsonableByte(i: Byte) = Num(i)
-  implicit def JsonableShort(i: Short) = Num(i)
-  implicit def JsonableInt(i: Int) = Num(i)
-  implicit def JsonableLong(i: Long) = Str(i.toString)
-  implicit def JsonableFloat(i: Float) = Num(i)
-  implicit def JsonableDouble(i: Double) = Num(i)
-  implicit def JsonableNull(i: Null) = Null
-  implicit def JsonableString(s: CharSequence) = Str(s.toString)
+                              (implicit f: T => Value): Obj = Obj.from(items.map(x => (x._1, f(x._2))))
+  implicit def JsonableBoolean(i: Boolean): Bool = if (i) ujson.True else ujson.False
+  implicit def JsonableByte(i: Byte): Num = Num(i)
+  implicit def JsonableShort(i: Short): Num = Num(i)
+  implicit def JsonableInt(i: Int): Num = Num(i)
+  implicit def JsonableLong(i: Long): Str = Str(i.toString)
+  implicit def JsonableFloat(i: Float): Num = Num(i)
+  implicit def JsonableDouble(i: Double): Num = Num(i)
+  implicit def JsonableNull(i: Null): Null.type = Null
+  implicit def JsonableString(s: CharSequence): Str = Str(s.toString)
 
 
   def transform[T](j: Value, f: Visitor[_, T]): T = {

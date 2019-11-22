@@ -186,6 +186,9 @@ object ujson extends Module{
       }
       def testFrameworks = Seq("org.scalatest.tools.Framework")
     }
+
+    def scalacOptions =
+      if (isDotty) List("-language:Scala2Compat") else Nil
   }
 
   object js extends Cross[JsModule]("2.12.8", "2.13.0")
@@ -195,7 +198,7 @@ object ujson extends Module{
     object test extends Tests with JawnTestModule
   }
 
-  object jvm extends Cross[JvmModule]("2.12.8", "2.13.0")
+  object jvm extends Cross[JvmModule]((List("2.12.8", "2.13.0") ++ BuildUtil.dottyVersion): _*)
   class JvmModule(val crossScalaVersion: String) extends JsonModule with CommonJvmModule{
     def moduleDeps = Seq(core.jvm())
     object test extends Tests with JawnTestModule
