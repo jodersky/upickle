@@ -2,8 +2,10 @@ package ujson
 
 import org.scalatest._
 import org.scalatest.prop._
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class BoolSpec extends PropSpec with Matchers with PropertyChecks with Inside {
+
+class BoolSpec extends PropSpec with Matchers with ScalaCheckPropertyChecks with Inside {
 
   property("ujson.Bool apply") {
     ujson.Bool(true) shouldBe ujson.True
@@ -11,13 +13,13 @@ class BoolSpec extends PropSpec with Matchers with PropertyChecks with Inside {
   }
 
   property("ujson.Bool.value") {
-    forAll { bool: Boolean =>
+    forAll { (bool: Boolean) =>
       ujson.Bool(bool).value shouldBe bool
     }
   }
 
   property("ujson.Bool unapply") {
-    forAll { bool: Boolean =>
+    forAll { (bool: Boolean) =>
       val jsb = ujson.Bool(bool)
       inside(jsb) {
         case ujson.Bool(value) =>

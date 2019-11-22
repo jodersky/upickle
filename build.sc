@@ -179,16 +179,23 @@ object ujson extends Module{
     def artifactName = "ujson"
     trait JawnTestModule extends CommonTestModule{
       def ivyDeps = T{
-        Agg(
+        if (!isDotty) Agg(
           ivy"org.scalatest::scalatest::3.0.8",
           ivy"org.scalacheck::scalacheck::1.14.1"
         )
+        else Agg(
+          ivy"org.scalatest::scalatest::3.1.0-SNAP13",
+          ivy"org.scalacheck::scalacheck::1.14.1-SNAPSHOT",
+          ivy"org.scalatestplus::scalacheck-1-14:3.1.0.0-RC3"
+        )
       }
       def testFrameworks = Seq("org.scalatest.tools.Framework")
+      def scalacOptions =
+        if (isDotty) List("-language:implicitConversions") else Nil
     }
 
     def scalacOptions =
-      if (isDotty) List("-language:Scala2Compat") else Nil
+      if (isDotty) List("-language:Scala2Compat,implicitConversions") else Nil
   }
 
   object js extends Cross[JsModule]("2.12.8", "2.13.0")

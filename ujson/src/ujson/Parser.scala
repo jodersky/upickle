@@ -215,7 +215,6 @@ abstract class Parser[J] {
       }
       if (j0 == j) die(i, "expected digit")
     }
-
     if (c == '.') {
       // any valid input will require at least one digit after .
       decIndex = j - i
@@ -231,7 +230,6 @@ abstract class Parser[J] {
       }
       if(j0 == j) die(i, "expected digit")
     }
-
     if (c == 'e' || c == 'E') {
       // any valid input will require at least one digit after e, e+, etc
       expIndex = j - i
@@ -252,7 +250,6 @@ abstract class Parser[J] {
       }
       if (j0 == j) die(i, "expected digit")
     }
-
     (facade.visitFloat64StringParts(at(i, j), decIndex, expIndex, i), j)
   }
 
@@ -360,6 +357,8 @@ abstract class Parser[J] {
       val y = line() + 1
       val x = column(j) + 1
       throw new AbortException(e.msg, j, y, x, path, e)
+    case e: AsyncException => throw e
+    case e: ParseException => throw e
   }
   /**
    * Tail-recursive parsing method to do the bulk of JSON parsing.

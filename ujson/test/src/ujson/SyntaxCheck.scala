@@ -7,10 +7,11 @@ import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop._
 import upickle.core.NoOpVisitor
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.util.Try
 
-class SyntaxCheck extends PropSpec with Matchers with PropertyChecks {
+class SyntaxCheck extends PropSpec with Matchers with ScalaCheckPropertyChecks {
 
   // failed to detect some failures in issue #243 at minSuccessful=10. Raised to minSuccessful=100.
   override implicit val generatorDrivenConfig: PropertyCheckConfiguration = PropertyCheckConfiguration(minSuccessful = 100)
@@ -50,10 +51,10 @@ class SyntaxCheck extends PropSpec with Matchers with PropertyChecks {
 
   def jvalue(lvl: Int): Gen[J] =
     if (lvl < 3) {
-      Gen.frequency((16, 'ato), (1, 'arr), (2, 'obj)).flatMap {
-        case 'ato => jatom
-        case 'arr => jarray(lvl)
-        case 'obj => jobject(lvl)
+      Gen.frequency((16, "ato"), (1, "arr"), (2, "obj")).flatMap {
+        case "ato" => jatom
+        case "arr" => jarray(lvl)
+        case "obj" => jobject(lvl)
       }
     } else {
       jatom
@@ -72,13 +73,11 @@ class SyntaxCheck extends PropSpec with Matchers with PropertyChecks {
     val r2 = Try(ByteBufferParser.transform(bb, NoOpVisitor)).isSuccess
     if (r0 == r1) r1 else sys.error(s"CharSequence/String parsing disagree($r0, $r1): $s")
     if (r1 == r2) r1 else sys.error(s"String/ByteBuffer parsing disagree($r1, $r2): $s")
-
     locally {
       val async = AsyncParser[Unit](AsyncParser.SingleValue)
       val r3 = async.absorb(s, NoOpVisitor).isRight && async.finish(NoOpVisitor).isRight
       if (r1 == r3) r1 else sys.error(s"Sync/Async parsing disagree($r1, $r3): $s")
     }
-
     locally {
       val async = AsyncParser[Unit](AsyncParser.SingleValue)
       val r3 = s.getBytes(StandardCharsets.UTF_8).foldLeft(true) { (isValid, byte) =>
