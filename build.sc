@@ -1,5 +1,9 @@
 import mill._, mill.scalalib._, mill.scalalib.publish._, mill.scalajslib._
 
+object BuildUtil {
+  val dottyVersion = Option(sys.props("dottyVersion"))
+}
+
 trait CommonModule extends ScalaModule {
   def scalacOptions = T{ if (scalaVersion() == "2.12.8") Seq("-opt:l:method") else Nil }
   def platformSegment: String
@@ -26,11 +30,18 @@ trait CommonPublishModule extends CommonModule with PublishModule with CrossScal
   )
 }
 
-trait CommonTestModule extends CommonModule with TestModule{
-  def ivyDeps = Agg(ivy"com.lihaoyi::utest::0.7.1", ivy"com.lihaoyi::acyclic:0.2.0")
-  def testFrameworks = Seq("upickle.core.UTestFramework")
+trait CommonCrossModule {
+  val crossScalaVersion: String
+  def isDotty = crossScalaVersion.startsWith("0")
+  trait CommonTestModule extends CommonModule with TestModule{
+    def ivyDeps = Agg(ivy"com.lihaoyi::utest::0.7.1") ++ (
+      if (isDotty) Agg.empty
+      else Agg(ivy"com.lihaoyi::acyclic:0.2.0"))
+    def testFrameworks = Seq("upickle.core.UTestFramework")
+  }
 }
-trait CommonJvmModule extends CommonPublishModule{
+
+trait CommonJvmModule extends CommonPublishModule with CommonCrossModule {
   def platformSegment = "jvm"
   def millSourcePath = super.millSourcePath / os.up
   trait Tests extends super.Tests with CommonTestModule{
@@ -38,7 +49,7 @@ trait CommonJvmModule extends CommonPublishModule{
   }
 
 }
-trait CommonJsModule extends CommonPublishModule with ScalaJSModule{
+trait CommonJsModule extends CommonPublishModule with ScalaJSModule with CommonCrossModule {
   def platformSegment = "js"
   def scalaJSVersion = "0.6.28"
   def millSourcePath = super.millSourcePath / os.up
@@ -60,12 +71,14 @@ object core extends Module {
     object test extends Tests
   }
 
-  object jvm extends Cross[CoreJvmModule]("2.12.8", "2.13.0")
+  object jvm extends Cross[CoreJvmModule]((List("2.12.8", "2.13.0") ++ BuildUtil.dottyVersion): _*)
   class CoreJvmModule(val crossScalaVersion: String) extends CommonJvmModule {
     def artifactName = "upickle-core"
-    def ivyDeps = Agg(
-      ivy"org.scala-lang.modules::scala-collection-compat:2.0.0"
-    )
+    def ivyDeps =
+      if (!isDotty)
+        Agg(ivy"org.scala-lang.modules::scala-collection-compat:2.0.0")
+      else
+        Agg(ivy"org.scala-lang.modules:scala-collection-compat_2.13:2.0.0")
 
     object test extends Tests
   }
@@ -162,7 +175,7 @@ object upack extends Module {
 
 
 object ujson extends Module{
-  trait JsonModule extends CommonPublishModule{
+  trait JsonModule extends CommonPublishModule with CommonCrossModule {
     def artifactName = "ujson"
     trait JawnTestModule extends CommonTestModule{
       def ivyDeps = T{
