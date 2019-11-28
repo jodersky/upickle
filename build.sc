@@ -163,12 +163,12 @@ object upack extends Module {
     }
   }
 
-  object jvm extends Cross[JvmModule]("2.12.8", "2.13.0")
+  object jvm extends Cross[JvmModule]((List("2.12.8", "2.13.0") ++ BuildUtil.dottyVersion): _*)
   class JvmModule(val crossScalaVersion: String) extends CommonJvmModule {
     def moduleDeps = Seq(core.jvm())
     def artifactName = "upack"
     object test extends Tests with CommonModule  {
-      def moduleDeps = super.moduleDeps ++ Seq(ujson.jvm().test, core.js().test)
+      def moduleDeps = super.moduleDeps ++ Seq(ujson.jvm().test, core.jvm().test)
     }
   }
 }
