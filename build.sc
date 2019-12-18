@@ -87,11 +87,13 @@ object core extends Module {
 
 object implicits extends Module {
 
-  trait ImplicitsModule extends CommonPublishModule{
-    def compileIvyDeps = Agg(
-      ivy"com.lihaoyi::acyclic:0.2.0",
-      ivy"org.scala-lang:scala-reflect:${scalaVersion()}"
-    )
+  trait ImplicitsModule extends CommonPublishModule with CommonCrossModule {
+    def compileIvyDeps =
+      if (!isDotty) Agg(
+        ivy"com.lihaoyi::acyclic:0.2.0",
+        ivy"org.scala-lang:scala-reflect:${scalaVersion()}")
+      else Agg.empty[Dep]
+
     def generatedSources = T{
       val dir = T.ctx().dest
       val file = dir / "upickle" / "Generated.scala"
@@ -115,8 +117,6 @@ object implicits extends Module {
 
       ammonite.ops.write(file, s"""
       package upickle.implicits
-      import acyclic.file
-      import language.experimental.macros
       /**
        * Auto-generated picklers and unpicklers, used for creating the 22
        * versions of tuple-picklers and case-class picklers
@@ -140,7 +140,7 @@ object implicits extends Module {
     }
   }
 
-  object jvm extends Cross[JvmModule]("2.12.8", "2.13.0")
+  object jvm extends Cross[JvmModule]((List("2.12.8", "2.13.0") ++ BuildUtil.dottyVersion): _*)
   class JvmModule(val crossScalaVersion: String) extends ImplicitsModule with CommonJvmModule{
     def moduleDeps = Seq(core.jvm())
     def artifactName = "upickle-implicits"
