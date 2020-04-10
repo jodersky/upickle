@@ -195,7 +195,7 @@ object ujson extends Module{
     }
 
     def scalacOptions =
-      if (isDotty) List("-language:Scala2Compat,implicitConversions") else Nil
+      if (isDotty) List("-language:implicitConversions", "-source:3.0-migration") else Nil
   }
 
   object js extends Cross[JsModule]("2.12.8", "2.13.0")
