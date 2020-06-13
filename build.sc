@@ -118,10 +118,19 @@ object core extends Module {
 object implicits extends Module {
 
   trait ImplicitsModule extends CommonPublishModule{
-    def compileIvyDeps = Agg(
-      ivy"com.lihaoyi::acyclic:${acyclicVersion(scalaVersion())}",
-      ivy"org.scala-lang:scala-reflect:${scalaVersion()}"
+    def compileIvyDeps = T {
+      if (!isDotty) Agg(
+        ivy"com.lihaoyi::acyclic:${acyclicVersion(scalaVersion())}",
+        ivy"org.scala-lang:scala-reflect:${scalaVersion()}"
+      ) else Agg.empty
+    }
+
+    def sources = T.sources(
+      super.sources()
+        .++(CrossModuleBase.scalaVersionPaths(crossScalaVersion, s => millSourcePath / s"src-$s" ))
+        .distinct
     )
+
     def generatedSources = T{
       val dir = T.ctx().dest
       val file = dir / "upickle" / "Generated.scala"
@@ -142,11 +151,10 @@ object implicits extends Module {
           new TupleNReader(Array($implicitReaderTuple), x => Tuple$i($lookupTuple).asInstanceOf[Tuple$i[$typeTuple]])
         """
       }
-
       ammonite.ops.write(file, s"""
       package upickle.implicits
-      import acyclic.file
-      import language.experimental.macros
+      //import acyclic.file
+      //import language.experimental.macros
       /**
        * Auto-generated picklers and unpicklers, used for creating the 22
        * versions of tuple-picklers and case-class picklers
@@ -154,7 +162,7 @@ object implicits extends Module {
       trait Generated extends upickle.core.Types{
         ${tuples.mkString("\n")}
       }
-    """)
+      """)
       Seq(PathRef(dir))
     }
 
@@ -320,11 +328,13 @@ object ujson extends Module{
 
 trait UpickleModule extends CommonPublishModule{
   def artifactName = "upickle"
-  def compileIvyDeps = Agg(
-    ivy"com.lihaoyi::acyclic:${acyclicVersion(scalaVersion())}",
-    ivy"org.scala-lang:scala-reflect:${scalaVersion()}",
-    ivy"org.scala-lang:scala-compiler:${scalaVersion()}"
-  )
+  def compileIvyDeps = T{
+    if (!isDotty) Agg(
+      ivy"com.lihaoyi::acyclic:${acyclicVersion(scalaVersion())}",
+      ivy"org.scala-lang:scala-reflect:${scalaVersion()}",
+      ivy"org.scala-lang:scala-compiler:${scalaVersion()}"
+    ) else Agg.empty
+  }
   def scalacOptions = Seq(
     "-unchecked",
     "-deprecation",
