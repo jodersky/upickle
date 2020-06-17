@@ -350,7 +350,9 @@ object upickle extends Module{
         )
       }
 
-      def scalacOptions = Seq("-Ximport-suggestion-timeout", "0")
+      def scalacOptions =
+        if (isDotty) Seq("-Ximport-suggestion-timeout", "0")
+        else Nil
     }
   }
 
