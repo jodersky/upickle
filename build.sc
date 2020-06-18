@@ -434,3 +434,12 @@ object bench extends Module {
     )
   }
 }
+
+
+object example extends ScalaModule {
+  def scalaVersion = dottyCustomVersion.get
+
+  def moduleDeps = Seq(upickle.jvm(dottyCustomVersion.get))
+
+  //def scalacOptions = Seq("-Xprint-inline")
+}
