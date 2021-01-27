@@ -4,7 +4,6 @@ import mill._, mill.scalalib._, mill.scalalib.publish._, mill.scalajslib._, mill
 val scala212  = "2.12.13"
 val scala213  = "2.13.4"
 val scala3    = "3.0.0-M3"
-val scalaJS06 = "0.6.33"
 val scalaJS1  = "1.4.0"
 val scalaNative = "0.4.0"
 
@@ -14,8 +13,6 @@ val scala2JVMVersions = Seq(scala212, scala213)
 val scalaJVMVersions = scala2JVMVersions ++ Seq(scala3) ++ dottyCustomVersion
 
 val scalaJSVersions = Seq(
-  (scala212, scalaJS06),
-  (scala213, scalaJS06),
   (scala212, scalaJS1),
   (scala213, scalaJS1)
 )
@@ -91,12 +88,10 @@ trait CommonNativeModule extends CommonPublishModule with ScalaNativeModule{
 
 trait CommonCoreModule extends CommonPublishModule {
   def artifactName = "upickle-core"
-  def ivyDeps = Agg(ivy"com.lihaoyi::geny::0.6.5") ++ (if (!isDotty) Agg(
-    ivy"org.scala-lang.modules::scala-collection-compat::2.1.4",
+  def ivyDeps = Agg(
+    ivy"org.scala-lang.modules::scala-collection-compat::2.4.0",
+    ivy"com.lihaoyi::geny::0.6.5"
   )
-  else Agg(
-    ivy"org.scala-lang.modules:scala-collection-compat_2.13:2.1.4",
-  ))
 }
 object core extends Module {
   object js extends Cross[CoreJsModule](scalaJSVersions:_*)
